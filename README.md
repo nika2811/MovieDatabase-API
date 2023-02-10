@@ -1,50 +1,48 @@
-# MovieDatabase API
+Create an [ASP.NET](http://ASP.NET) Core API that allows you to add, edit, delete, and search for movies.
 
-შექმენით [ASP.NET](http://ASP.NET) Core API, რომლის საშუალებითაც შესაძლებელი იქნება ფილმის დამატება, რედაქტირება, წაშლა და ძიება.
+### The movie must have the following fields:
 
-### ფილმს უნდა ჰქონდეს შემდეგი ველები:
+- name (mandatory field. maximum length 200 characters)
+- short description (mandatory field. maximum length 2000 characters)
+- Release year (required field)
+- director (required field)
+- status (mandatory field. can be active or deleted)
+- date of creation (required field)
 
-- სახელი (აუცილებელი ველი. მაქსიმალური სიგრძე 200 სიმბოლო)
-- მოკლე აღწერა (აუცილებელი ველი. მაქსიმალური სიგრძე 2000 სიმბოლო)
-- გამოშვების წელი (აუცილებელი ველი)
-- რეჟისორი (აუცილებელი ველი)
-- სტატუსი (აუცილებელი ველი. შეიძლება იყოს აქტიური ან წაშლილი)
-- შექმნის თარიღი (აუცილებელი ველი)
+### The API must have the following endpoints:
 
-### API-ს უნდა ჰქონდეს შემდეგი endpoint-ები:
+1. /movie/add - adding a movie to the database
+2. /movie/get - search for a movie by a unique identifier (Id).
+3. /movie/search - search for movies by name, description, director or year of release.
+4. /movie/update - updating the movie database
+5. /movie/delete - delete the movie (soft delete)
 
-1. /movie/add - ფილმის ბაზაში დამატება
-2. /movie/get - ფილმის ძიება უნიკალური იდენტიფიკატორის (Id) მიხედვით
-3. /movie/search - ფილმების ძიება დასახელების, აღწერის, რეჟისორის ან გამოშვების წლის მიხედვით.
-4. /movie/update - ფილმის მონაცემების ბაზაში განახლება
-5. /movie/delete - ფილმის წაშლა (soft delete)
+### Add movie
 
-### ფილმის დამატება
+The following conditions must be checked when adding a film:
 
-ფილმის დამატების დროს უნდა შემოწმდეს შემდეგი პირობები:
+- The name of the movie must not be empty
+- Short description should not be empty
+- Year of issue must be at least 1895
+- The director field must not be empty
 
-- ფილმის სახელი არ უნდა იყოს ცარიელი
-- მოკლე აღწერა არ უნდა იყოს ცარიელი
-- გამოშვების წელი უნდა იყოს მინიმუმ 1895
-- რეჟისორის ველი არ უნდა იყოს ცარიელი
+### Search
 
-### ძიება
+Search by title, description, director or year of release.
 
-ძიება უნდა მოხდეს დასახელების, აღწერის, რეჟისორის ან გამოშვების წლის მიხედვით.
+### update
 
-### განახლება
+When updating a movie, it should be possible to change the title, short description, release year and director fields.
 
-ფილმის განახლების დროს შესაძლებელი უნდა იყოს დასახელების, მოკლე აღწერის, გამოშვების წლისა და რეჟისორის ველების ცვლილება.
+### Delete
 
-### წაშლა
+When deleting a movie, the status of the movie should be changed. It should not be physically deleted.
 
-ფილმის წაშლის დროს უნდა შეიცვალოს ფილმის სტატუსი. არ უნდა მოხდეს მისი ფიზიკურად წაშლა.
+Data must be stored in SQL Server.
 
-მონაცემების შენახვა უნდა მოხდეს SQL Server-ში.
+### Additional functionality (not necessary)
 
-### დამატებითი ფუნქციონალი (არ არის აუცილებელი)
-
-1. ფილმების ძიების დროს შესაძლებელი უნდა იყოს გვერდის ზომის (PageSize) და მისი ინდექსის (PageIndex) მითითება. ერთ ჯერზე დაბრუნებული ფილმების რაოდენობა არ უნდა აჭარბებდეს 100-ს
-2. ფილმს ერთდროულად შესაძლოა მითითებული ჰქონდეს რამდენიმე ჟანრი, ამიტომ ბაზაში ამ ინფორმაციის შესანახად უნდა არსებობდეს შესაბამისი ცხრილები
-3. ფილმების ძიება შესაძლებელი უნდა იყოს ჟანრის მიხედვით
-4. API-ში შეცდომის მოხდენის შემთხვევაში, ინფორმაცია უნდა ინახებოდეს მონაცემთა ბაზაში (ErrorLog ცხრილში)
+1. When searching for movies, it should be possible to indicate the page size (PageSize) and its index (PageIndex). The number of films returned at one time should not exceed 100
+2. The movie may have several genres at the same time, so the database should have appropriate tables to store this information.
+3. Movies should be searchable by genre
+4. In case of an error in the API, the information should be stored in the database (in the ErrorLog table)
