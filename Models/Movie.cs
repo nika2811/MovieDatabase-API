@@ -27,4 +27,5 @@ public class Movie
     [Required] public MovieStatus Status { get; set; }
 
     [Required] public DateTime CreationDate { get; set; }
+    public List<MovieGenre> MovieGenres { get; set; }
 }

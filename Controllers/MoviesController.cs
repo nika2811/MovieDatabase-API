@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using MovieDatabase_API.Controllers.Endpoints;
 using MovieDatabase_API.Db;
 using MovieDatabase_API.Models;
 
@@ -9,34 +9,35 @@ namespace MovieDatabase_API.Controllers;
 [ApiController]
 public class MovieController : ControllerBase
 {
+    private readonly AddEndpoint _addEndpoint;
     private readonly MovieContext _context;
+    private readonly DeleteEndpoint _deleteEndpoint;
+    private readonly GetEndpoint _getEndpoint;
+    private readonly SearchEndpoint _searchEndpoint;
+    private readonly UpdateEndpoint _updateEndpoint;
 
-    public MovieController(MovieContext context)
+
+    public MovieController(MovieContext context, GetEndpoint getEndpoint, SearchEndpoint searchEndpoint,
+        AddEndpoint addEndpoint, UpdateEndpoint updateEndpoint, DeleteEndpoint deleteEndpoint)
     {
         _context = context;
+        _getEndpoint = getEndpoint;
+        _searchEndpoint = searchEndpoint;
+        _addEndpoint = addEndpoint;
+        _updateEndpoint = updateEndpoint;
+        _deleteEndpoint = deleteEndpoint;
     }
 
-
-    [HttpGet("get/{id}")]
+    [HttpPost("/movie/get")]
     public ActionResult<Movie> Get(int id)
     {
-        var movie = _context.Movies.FirstOrDefault(x => x.Id == id);
-        if (movie == null) return NotFound();
-        return movie;
+        return _getEndpoint.Get(id);
     }
 
     [HttpPost("/movie/add")]
     public async Task<IActionResult> Add([FromBody] Movie movie)
     {
-        if (string.IsNullOrEmpty(movie.Name)) return BadRequest("Movie name is required.");
-        if (string.IsNullOrEmpty(movie.Description)) return BadRequest("Movie short description is required.");
-        if (movie.ReleaseYear < 1895) return BadRequest("Release year must be at least 1895.");
-        if (string.IsNullOrEmpty(movie.Director)) return BadRequest("Director is required.");
-        movie.Status = MovieStatus.Active;
-        movie.CreationDate = DateTime.Now;
-        _context.Movies.Add(movie);
-        await _context.SaveChangesAsync();
-        return Ok();
+        return await _addEndpoint.Add(movie);
     }
 
 
@@ -44,52 +45,20 @@ public class MovieController : ControllerBase
     public async Task<IActionResult> Search(string title = "", string description = "", string director = "",
         int releaseYear = 0, int pageIndex = 0, int pageSize = 100)
     {
-        var movies = _context.Movies.Where(x => x.Status == MovieStatus.Active);
-
-        if (!string.IsNullOrEmpty(title)) movies = movies.Where(x => x.Name.Contains(title));
-
-        if (!string.IsNullOrEmpty(description)) movies = movies.Where(x => x.Description.Contains(description));
-
-        if (!string.IsNullOrEmpty(director)) movies = movies.Where(x => x.Director.Contains(director));
-
-        if (releaseYear != 0) movies = movies.Where(x => x.ReleaseYear == releaseYear);
-
-        //return Ok(await movies.ToListAsync());
-        return Ok(await movies.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync());
+        return await _searchEndpoint.Search(title, description, director, releaseYear, pageIndex, pageSize);
     }
 
 
     [HttpPut("update/{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] Movie movie)
     {
-        var targetMovie = await _context.Movies.FindAsync(id);
-
-        if (targetMovie == null) return NotFound();
-
-        if (!string.IsNullOrEmpty(movie.Name)) targetMovie.Name = movie.Name;
-
-        if (!string.IsNullOrEmpty(movie.Description)) targetMovie.Description = movie.Description;
-
-        if (!string.IsNullOrEmpty(movie.Director)) targetMovie.Director = movie.Director;
-
-        if (movie.ReleaseYear != 0) targetMovie.ReleaseYear = movie.ReleaseYear;
-
-        _context.Movies.Update(targetMovie);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
+        return await _updateEndpoint.Update(id, movie);
     }
 
 
     [HttpDelete("delete/{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var movie = await _context.Movies.FindAsync(id);
-        if (movie == null) return NotFound();
-
-        movie.Status = MovieStatus.Deleted;
-        await _context.SaveChangesAsync();
-
-        return NoContent();
+        return await _deleteEndpoint.Delete(id);
     }
 }

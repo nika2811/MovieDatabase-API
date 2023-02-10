@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MovieDatabase_API.Controllers.Endpoints;
 using MovieDatabase_API.Db;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<MovieContext>(c => c.UseSqlServer(builder.Configuration["AppDbContextConnection"]));
+builder.Services.AddTransient<AddEndpoint>();
+builder.Services.AddTransient<DeleteEndpoint>();
+builder.Services.AddTransient<SearchEndpoint>();
+builder.Services.AddTransient<UpdateEndpoint>();
+builder.Services.AddTransient<GetEndpoint>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
