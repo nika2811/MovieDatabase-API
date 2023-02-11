@@ -53,7 +53,19 @@ public class UpdateEndpoint : ControllerBase
 
         _context.Movies.Update(existingMovie);
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            // If an error occurs, log the error to the ErrorLogs table
+            _context.ErrorLogs.Add(new ErrorLog
+                { Message = ex.Message, StackTrace = ex.StackTrace, CreationDate = DateTime.Now });
+
+            // Return a 500 Internal Server Error response
+            return StatusCode(500, "An error occurred while updating the movie.");
+        }
 
         return Ok();
     }

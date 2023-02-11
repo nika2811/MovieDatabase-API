@@ -28,6 +28,19 @@ public class SearchEndpoint : ControllerBase
 
         if (releaseYear != 0) movies = movies.Where(x => x.ReleaseYear == releaseYear);
 
-        return Ok(await movies.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync());
+        try
+        {
+            return Ok(await movies.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync());
+        }
+        catch (Exception ex)
+        {
+            // If an error occurs, log the error to the ErrorLogs table
+            _context.ErrorLogs.Add(new ErrorLog
+                { Message = ex.Message, StackTrace = ex.StackTrace, CreationDate = DateTime.Now });
+            await _context.SaveChangesAsync();
+
+            // Return a 500 Internal Server Error response
+            return StatusCode(500, "An error occurred while processing the request. The error has been logged.");
+        }
     }
 }
